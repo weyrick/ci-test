@@ -10,6 +10,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  IMAGE_NAME: weyrick/ci-test
 
 jobs:
   build:
@@ -99,10 +100,24 @@ jobs:
       - name: Debug ref tag
         run: echo ${{ env.REF_TAG }}
 
-      - name: Build docker image
-        run: docker build . --file docker/Dockerfile --tag repo/ci-test:${{ env.REF_TAG }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Tag VERSION if this is master
+      - name: Build + push docker image
+        run: |
+          docker build . --file docker/Dockerfile --tag ${{ env.IMAGE_NAME }}:${{ env.REF_TAG }}
+          docker push ${{ env.IMAGE_NAME }}:${{ env.REF_TAG }}
+
+      - name: Also tag + push VERSION if master release
         if: ${{ env.BRANCH_NAME == 'master' }}
-        run: docker build . --file docker/Dockerfile --tag repo/ci-test:${{ env.VERSION }}
+        run: |
+          docker build . --file docker/Dockerfile --tag ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          docker push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
+      # create static binary
+      # if not master
+      # update github pre-release
+      # else if master save artifact
