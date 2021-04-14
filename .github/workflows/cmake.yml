@@ -163,10 +163,9 @@ jobs:
           github-token: ${{ github.token }}
           script: |
             try {
-                console.log(await github.repos.getReleaseByTag({
+                console.log(await github.repos.listReleases({
                   owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  tag: "${{ env.REF_TAG }}",
+                  repo: context.repo.repo
                 }))
             } catch (e) {
               console.log("The tag doesn't exist yet: " + e)
