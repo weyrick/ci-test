@@ -11,6 +11,7 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   IMAGE_NAME: weyrick/ci-test
+  BINARY: ci_test
 
 jobs:
   build:
@@ -51,6 +52,12 @@ jobs:
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C $BUILD_TYPE
 
+    - name: Upload binary artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: binary
+        path: ${{github.workspace}}/build/${{env.BINARY}}
+
   package:
     needs: build
     runs-on: ubuntu-latest
@@ -90,12 +97,12 @@ jobs:
       - name: Generate ref tag (develop)
         if: ${{ env.BRANCH_NAME == 'develop' }}
         run: |
-          echo "REF_TAG=develop-${{ env.VERSION }}" >> $GITHUB_ENV
+          echo "REF_TAG=develop" >> $GITHUB_ENV
 
       - name: Generate ref tag (release candidate)
         if: ${{ env.BRANCH_NAME == 'release' }}
         run: |
-          echo "REF_TAG=rc-${{ env.VERSION }}" >> $GITHUB_ENV
+          echo "REF_TAG=rc" >> $GITHUB_ENV
 
       - name: Debug ref tag
         run: echo ${{ env.REF_TAG }}
@@ -106,18 +113,29 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build + push docker image
-        run: |
-          docker build . --file docker/Dockerfile --tag ${{ env.IMAGE_NAME }}:${{ env.REF_TAG }}
-          docker push ${{ env.IMAGE_NAME }}:${{ env.REF_TAG }}
-
-      - name: Also tag + push VERSION if master release
-        if: ${{ env.BRANCH_NAME == 'master' }}
+      - name: Tag + push VERSION
         run: |
           docker build . --file docker/Dockerfile --tag ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
           docker push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
-      # create static binary
+      - name: Build + push docker image with ref tag (cached build)
+        run: |
+          docker build . --file docker/Dockerfile --tag ${{ env.IMAGE_NAME }}:${{ env.REF_TAG }}
+          docker push ${{ env.IMAGE_NAME }}:${{ env.REF_TAG }}
+
+      - name: Download binary
+        uses: actions/download-artifact@v2
+        with:
+          name: binary
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{env.BINARY}}
+          name: ${{env.VERSION}}
+          tag_name: ${{env.REF_TAG}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # if not master
       # update github pre-release
       # else if master save artifact
