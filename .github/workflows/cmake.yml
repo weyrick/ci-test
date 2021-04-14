@@ -157,6 +157,21 @@ jobs:
         with:
           name: binary
 
+      - name: Manage Github existing releases
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            try {
+                consul.log(await github.repos.getReleaseByTag({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  tag: "${{ env.REF_TAG }}",
+                }))
+            } catch (e) {
+              console.log("The tag doesn't exist yet: " + e)
+            }
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
