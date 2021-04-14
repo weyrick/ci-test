@@ -99,14 +99,14 @@ jobs:
       - name: Generate ref tag (develop)
         if: ${{ env.BRANCH_NAME == 'develop' }}
         run: |
-          echo "REF_TAG=develop" >> $GITHUB_ENV
+          echo "REF_TAG=latest-develop" >> $GITHUB_ENV
           echo "PRERELEASE=true" >> $GITHUB_ENV
           echo "DRAFT=false" >> $GITHUB_ENV
 
       - name: Generate ref tag (release candidate)
         if: ${{ env.BRANCH_NAME == 'release' }}
         run: |
-          echo "REF_TAG=rc" >> $GITHUB_ENV
+          echo "REF_TAG=latest-rc" >> $GITHUB_ENV
           echo "PRERELEASE=true" >> $GITHUB_ENV
           echo "DRAFT=false" >> $GITHUB_ENV
 
