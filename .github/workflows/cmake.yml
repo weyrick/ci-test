@@ -1,6 +1,7 @@
 name: CMake
 
 on:
+  repository_dispatch:
   push:
     branches:
       - master
@@ -110,7 +111,7 @@ jobs:
           echo "PRERELEASE=true" >> $GITHUB_ENV
           echo "DRAFT=false" >> $GITHUB_ENV
 
-      - name: Managed Github ref tags
+      - name: Manage Github ref tags
         uses: actions/github-script@v3
         with:
           github-token: ${{ github.token }}
