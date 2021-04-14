@@ -64,7 +64,7 @@ jobs:
 
       - name: Get branch name (merge)
         shell: bash
-        run: echo "BRANCH_NAME=$(echo ${${GITHUB_REF#refs/heads/}%/*}" >> $GITHUB_ENV
+        run: echo "BRANCH_NAME=`echo ${${GITHUB_REF#refs/heads/}%/*}` >> $GITHUB_ENV
 
       - name: Debug branch name
         run: echo ${{ env.BRANCH_NAME }}
