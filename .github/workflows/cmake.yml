@@ -165,6 +165,7 @@ jobs:
           draft: ${{env.DRAFT}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       # if not master
       # update github pre-release
       # else if master save artifact
