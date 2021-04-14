@@ -114,17 +114,14 @@ jobs:
         uses: actions/github-script@v3
         with:
           github-token: ${{ github.token }}
+          # note deleteRef can't start with refs/, but create createRef does.
           script: |
-            console.log(await github.git.listMatchingRefs({
-                                           owner: context.repo.owner,
-                                           repo: context.repo.repo
-                                         }))
             try {
-                console.log(await github.git.deleteRef({
+                await github.git.deleteRef({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   ref: "tags/${{ env.REF_TAG }}",
-                }))
+                })
             } catch (e) {
               console.log("The tag doesn't exist yet: " + e)
             }
