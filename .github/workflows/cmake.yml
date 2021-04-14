@@ -110,21 +110,24 @@ jobs:
           echo "PRERELEASE=true" >> $GITHUB_ENV
           echo "DRAFT=false" >> $GITHUB_ENV
 
-      - name: Create Github tags
+      - name: Managed Github ref tags
         uses: actions/github-script@v3
         with:
           github-token: ${{ github.token }}
           script: |
-            github.git.createRef({
+            try {
+                await github.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: "refs/tags/${{ env.REF_TAG }}",
+                })
+            } catch (e) {
+              console.log("The tag doesn't exist yet: " + e)
+            }
+            await github.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: "refs/tags/${{ env.REF_TAG }}",
-              sha: context.sha
-            })
-            github.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: "refs/tags/${{ env.VERSION }}",
               sha: context.sha
             })
 
