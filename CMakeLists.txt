@@ -4,6 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 # this is the source of truth for semver version
 project(ci_test VERSION 1.0.0)
 
+
 # for main line release, this is empty
 # for development release, this is "-develop"
 # for release candidate, this is "-rc"
