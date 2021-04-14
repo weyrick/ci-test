@@ -117,8 +117,7 @@ jobs:
           script: |
             console.log(await github.git.listMatchingRefs({
                                            owner: context.repo.owner,
-                                           repo: context.repo.repo,
-                                           ref: "ref",
+                                           repo: context.repo.repo
                                          }));
             try {
                 await github.git.deleteRef({
