@@ -77,24 +77,27 @@ jobs:
         run: echo ${{ env.VERSION }}
 
       - name: Generate ref tag (master)
-        if: ${{ env.BRANCH_NAME }} == "master"
+        if: ${{ env.BRANCH_NAME == 'master' }}
         run: |
           echo "REF_TAG=latest" >> $GITHUB_ENV
 
       - name: Generate ref tag (develop)
-        if: ${{ env.BRANCH_NAME }} == "develop"
+        if: ${{ env.BRANCH_NAME == 'develop' }}
         run: |
           echo "REF_TAG=develop-${{ env.VERSION }}" >> $GITHUB_ENV
 
       - name: Generate ref tag (release candidate)
-        if: ${{ env.BRANCH_NAME }} == "release"
+        if: ${{ env.BRANCH_NAME == 'release' }}
         run: |
           echo "REF_TAG=rc-${{ env.VERSION }}" >> $GITHUB_ENV
 
       - name: Debug ref tag
         run: echo ${{ env.REF_TAG }}
 
-      - name: Build docker image, tag VERSION
-        run: docker build . --file docker/Dockerfile --tag repo/ci-test:${{ env.VERSION }}
+      - name: Build docker image
+        run: docker build . --file docker/Dockerfile --tag repo/ci-test:${{ env.REF_TAG }}
 
+      - name: Tag VERSION if this is master
+        if: ${{ env.BRANCH_NAME == 'master' }}
+        run: docker build . --file docker/Dockerfile --tag repo/ci-test:${{ env.VERSION }}
 
