@@ -93,16 +93,22 @@ jobs:
         if: ${{ env.BRANCH_NAME == 'master' }}
         run: |
           echo "REF_TAG=latest" >> $GITHUB_ENV
+          echo "PRERELEASE=false" >> $GITHUB_ENV
+          echo "DRAFT=true" >> $GITHUB_ENV
 
       - name: Generate ref tag (develop)
         if: ${{ env.BRANCH_NAME == 'develop' }}
         run: |
           echo "REF_TAG=develop" >> $GITHUB_ENV
+          echo "PRERELEASE=true" >> $GITHUB_ENV
+          echo "DRAFT=false" >> $GITHUB_ENV
 
       - name: Generate ref tag (release candidate)
         if: ${{ env.BRANCH_NAME == 'release' }}
         run: |
           echo "REF_TAG=rc" >> $GITHUB_ENV
+          echo "PRERELEASE=true" >> $GITHUB_ENV
+          echo "DRAFT=false" >> $GITHUB_ENV
 
       - name: Debug ref tag
         run: echo ${{ env.REF_TAG }}
@@ -113,12 +119,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Tag + push VERSION
+      - name: Build + push VERSION
         run: |
           docker build . --file docker/Dockerfile --tag ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
           docker push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
-      - name: Build + push docker image with ref tag (cached build)
+      - name: Tag + push docker image with ref tag (cached build)
         run: |
           docker build . --file docker/Dockerfile --tag ${{ env.IMAGE_NAME }}:${{ env.REF_TAG }}
           docker push ${{ env.IMAGE_NAME }}:${{ env.REF_TAG }}
@@ -134,6 +140,8 @@ jobs:
           files: ${{env.BINARY}}
           name: ${{env.VERSION}}
           tag_name: ${{env.REF_TAG}}
+          prerelease: ${{env.PRERELEASE}}
+          draft: ${{env.DRAFT}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # if not master
