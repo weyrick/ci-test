@@ -123,7 +123,7 @@ jobs:
                 console.log(await github.git.deleteRef({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  ref: "refs/tags/${{ env.REF_TAG }}",
+                  ref: "tags/${{ env.REF_TAG }}",
                 }))
             } catch (e) {
               console.log("The tag doesn't exist yet: " + e)
